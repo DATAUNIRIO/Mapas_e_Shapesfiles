@@ -1,0 +1,128 @@
+---
+title: "Mapas com Leaflet a partir de Shapes"
+author: "prof. Steven Dutt Ross"
+output: 
+  html_document:
+  theme: flatly
+highlight: tango
+toc: true
+toc_float: true
+code_folding: hide
+---
+  
+<head>
+<style>
+  body {
+    background-color: #6bcaea;
+  }
+</style>
+</head>
+
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#install.packages("brazilmaps")
+#devtools::install_github("rpradosiqueira/brazilmaps")
+#https://kuanhoong.wordpress.com/2016/01/19/googlevis-with-r-markdown/
+require(googleVis)
+op <- options(gvis.plot.tag="chart")
+
+```
+
+# Por um mundo com mapas
+
+<!--get_brmap(geo = c("Brazil","Region","State","MesoRegion","MicroRegion","City"),
+                          geo.filter = NULL,
+                          class = c("sf", "SpatialPolygonsDataFrame", "data.frame"))
+                          -->
+
+
+```{r zero,warning=FALSE,message=FALSE,echo=FALSE}
+#install.packages('RCurl')
+library(RCurl)
+x <- getURL("https://raw.githubusercontent.com/DATAUNIRIO/Base_de_dados/master/Estados.csv")
+BaseUF <- read.csv(text=x, header=T, quote="", sep=";",dec = ",")
+
+library(brazilmaps)
+# Get de map
+Mapa_brasil <- get_brmap(geo = "State",
+                     geo.filter = NULL,
+                     class = "sf")
+                     #class = "SpatialPolygonsDataFrame")
+
+library(maptools)
+class(Mapa_brasil$State)
+class(BaseUF$Codigo)
+(Mapa_basededados <- merge(Mapa_brasil, BaseUF, by.x = "State", by.y = "Codigo"))
+```
+
+
+```{r meio,warning=FALSE,message=FALSE,echo=FALSE, results='asis', tidy=TRUE}
+library(googleVis)
+Mapa<- gvisGeoChart(BaseUF, "Estado", "Gini",
+                          options=list(region="BR", 
+                                       displayMode="regions", 
+                                       resolution="provinces",
+                                       width=600, height=400))
+plot(Mapa)
+```
+
+```{r um,warning=FALSE,message=FALSE,echo=FALSE}
+library(leaflet)
+leaflet(Mapa_basededados) %>%
+  addPolygons(color = "#444444", weight = 1, smoothFactor = 0.5,
+              opacity = 1.0, fillOpacity = 0.5,
+              fillColor = ~colorQuantile("YlOrRd", Gini)(Gini),
+              highlightOptions = highlightOptions(color = "white", weight = 2,
+                                                  bringToFront = TRUE))
+```
+
+```{r, echo=FALSE, results='asis', tidy=TRUE}
+
+####################################################################################
+rio<-readRDS(gzcon(url("https://raw.githubusercontent.com/DATAUNIRIO/Base_de_dados/master/rio.rds")))
+
+library(brazilmaps)
+# Get de map
+Mapa_rio <- get_brmap(geo = "City",
+                         geo.filter = list(State = 33),
+                         #class = "sf") # para mostrar a chave com a base de dados
+                         class = "SpatialPolygonsDataFrame")
+library(maptools)
+(Mapa_baserio <- merge(x=Mapa_rio, y=rio, by.x = "City", by.y = "COD.IBGE2"))
+class(Mapa_baserio)
+
+library(leaflet)
+leaflet(Mapa_baserio) %>%
+  addPolygons(color = "#444444", weight = 1, smoothFactor = 0.5,
+              opacity = 1.0, fillOpacity = 0.5,
+              fillColor = ~colorQuantile("YlOrRd", Gini)(Gini),
+              highlightOptions = highlightOptions(color = "white", weight = 2,
+                                                  bringToFront = TRUE))
+
+```
+
+```{r ,eval = FALSE}
+
+#############################################################################################
+# outros shapes
+#############################################################################################
+sudeste <- get_brmap(geo = "City",
+                     geo.filter = list(Region = 3))
+# Plot
+plot_brmap(sudeste)
+
+rio_Estado <- get_brmap(geo = "State",
+                     geo.filter = list(State = 33),
+                     class = "sf")
+plot_brmap(rio_Estado)
+
+rio_map <- get_brmap(geo = "City",
+                     geo.filter = list(State = 33),
+                     class = "sf")
+plot_brmap(rio_map)
+
+```
+
+
+
