@@ -1,5 +1,5 @@
 ---
-title: "Mapas com Leaflet a partir de Shapes"
+title: "Mapas a partir de Shapes"
 author: "prof. Steven Dutt Ross"
 output: 
   html_document:
@@ -39,7 +39,7 @@ Opções de formato do Shapefile:  class = c("sf", "SpatialPolygonsDataFrame", "
 2. SpatialPolygonsDataFrame fica com arquivo grande
 3. Data.Frame dificulta a visualização de mapas
 
-Sugiro que faça um **sf** para visualizar as colunas do shape para o MERGE e depois um **SpatialPolygonsDataFrame** para gerar o mapa no Leaflet.
+Sugiro que faça um **sf** para visualizar as colunas do shape para o MERGE e depois um **SpatialPolygonsDataFrame** para gerar o mapa.
 
 O código:
 ```
